@@ -148,7 +148,7 @@ guidata(hObject, handles);
 function openFile(hObject,handles,selection,path_in)
     
 % Open a image file: first clean the info field
-e=tic;
+e = tic;
 set (handles.stackSizeTxt, 'String', '');
 set (handles.timeAndSpaceTxt, 'String', '');
 set (handles.moreInfoTxt, 'String', '');
@@ -220,7 +220,7 @@ guidata(hObject, handles);
 
 % set all initial values
 setAllInitialValues (hObject, handles);
-e = toc;
+e = toc(e);
 disp(['End of load file: ' num2str(e) ' sec'])
 handles = guidata(hObject);
 

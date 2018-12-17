@@ -253,11 +253,11 @@ if handles.AsciiRB.Value, fmtSt = '*.dat';
     % Create the string describing the data format
     fmtSt='';
     for ii=1:handles.nCh
-       fmtSt=[fmtSt '%f'];
+       fmtSt = [fmtSt '%f'];
     end
     if handles.timeIncluded.Value,
         % add one column for the time axis
-        fmtSt=[fmtSt '%f'];
+        fmtSt = [fmtSt '%f'];
         nc = nc + 1;
     end    
     LFPin = fscanf(fid,fmtSt,[nc,inf]);
