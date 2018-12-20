@@ -489,7 +489,7 @@ if handles.binaryFlag,
             % plot raw binary frame
     %         handles.binImage = imagesc(tmp,'ButtonDownFcn',@mdImageClick);
     %         set(handles.imageExplore,'Clim',Flim);  % impose the new axes limits
-            frame = squeeze(handles.binaryThrImages(:,:,1,handles.currentFrame));                     
+            frame = squeeze(handles.binaryThrImages(:,:,1,handles.currentFrame));
             [row, column] = find(frame);
             scatter(column,row,1);
             axis([0 handles.WIrows 0 handles.WIcolumns]);
@@ -682,9 +682,7 @@ for i=1:handles.metadata.frames
     tmp = handles.erodedBinaryImages (:,:,1,i); 
     filteredFrame = imerode(tmp,structElxy);
     % 20-12-18 by Didi: added the imdilate function back in, with the
-    % correct figure to dilate: the previously eroded binary stack (before
-    % the figure input was 'temp' which therefore effectively undid all
-    % filtering done by the imerode function
+    % correct 
     filteredFrame = imdilate(filteredFrame,structElxy);
     %filteredFrame = bwareafilt(tmp,handles.rangefilt);
     handles.erodedBinaryImages (:,:,1,i) = filteredFrame;
