@@ -1,11 +1,10 @@
-% Hopefully this can be used to analyze the caclium imaging data. 
+% Hopefully this can be used to analyze the calcium imaging data. 
 % February 2019 by Didi
 
 % let's set all the variables obtained until now from now.
 
-% First, after you obtained all the ROI particle and pasted in excel:
-% import it using matlab 'import data'. 
-name = test2; % fill out the name 
+% First, after you obtained all the ROI particle and pasted in excel: 
+[~,~,excel] = xlsread('C:\Users\Dieds\Google Drive\PhD PCDH19\data\calcium imaging mosaic\test2.xlsx'); % fill out the name 
 greennumber = 1; % fill out the number of green ROIs, make sure they are second in the excel file
 rednumber = 7; % fill out the number of red ROIs, make sure they are third in the excel file
 imagingperiod = 0.12415810148978500000;
@@ -22,17 +21,23 @@ if isempty(tmp)
 end
 
 % Now let's set the time of each frame 
-[frame, column_roi] = size(test2);
+[frame, column_roi] = size(excel);
 frames = 1:frame;
-timeframes = (frames-1)*imagingperiod;
+timeframes = (frames-1)*imagingperiod; % a vector where each row contains the time when this frame was taken
 
 % Then set the number of ROIs
 numberROI = column_roi/5;
 wholefieldROIs = 1;
 greenROIs = 2:greennumber+1;
-redROIs = greennumber+2:numberROI;
+redROIs = greenROIs(end)+1:numberROI;
 
-% find the real up state start and end times
+% test if okay
+if length(greenROIs) ~= greennumber || length(redROIs) ~= rednumber
+    error('you calculated the green and red ROIs wrong');
+end
+
+% find the up state start and end times as determined in eventdetection,
+% from the start of the ephys recording
 NUS = length(tmp);
 USrawstart = zeros(NUS,1);
 USrawend = zeros(NUS,1);
@@ -43,4 +48,40 @@ for i = 1:NUS
     USrawend(i) = en;
 end
 
+% then we have to remove those up states that were outside of the imaging
+% interval. I do this by creating a vector called validUS that contains
+% info on whether or not the up state is valid
 
+validUS = zeros(NUS,1);
+for i = 1:NUS
+    if USrawend(i) <= LFPstartgalvo || USrawstart >= LFPstopgalvo
+        validUS(i) = 0;
+    else
+        validUS(i) = 1;
+    end
+end
+      
+% find the first and last up states, if they are on the edge of the imaging
+% time, change the start/end time to start/end time of imaging. 
+validUS2 = find(validUS > 0);
+NUSvalid = length(validUS2);
+firstUS = validUS2(1);
+lastUS = validUS2(end);
+if tmp{firstUS, 2} < LFPstartgalvo
+    USrawstart(firstUS) = LFPstartgalvo;
+end
+if tmp{lastUS, 3} > LFPstopgalvo
+    USrawend(lastUS) = LFPstopgalvo;
+end
+
+% Now we can set the correct start time in terms of time in seconds
+USstart = zeros(NUS, 1);
+USend = zeros(NUS, 1);
+for i = firstUS:lastUS
+    USstart(i) = USrawstart - LFPstartgalvo;
+    USend(i) = USrawend - LFPstartgalvo;
+end
+    
+% Done with all the setting up.
+
+% Start with findings 
