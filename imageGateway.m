@@ -961,7 +961,8 @@ function createAVIbtn_Callback(hObject, eventdata, handles)
 % This function create a non compressed AVI movie of the binarized data
 
 % create the output object
-AVIout = VideoWriter ('ROIdemo.avi','Uncompressed AVI');
+namevideo = [handles.dirIn 'BinaryVideo.avi'];
+AVIout = VideoWriter (namevideo,'Uncompressed AVI');
 open(AVIout);
 
 % prepare the figure for the video out.
@@ -975,8 +976,8 @@ set(hMovie, 'XTick', [], 'YTick', []);
 axes(hMovie);
 for i=1:handles.metadata.frames   
     frame = squeeze(handles.erodedBinaryImages(:,:,1,i));
-    [row, column] = find(frame);
-    plot(column,row,'.');
+    [row, column] = find(frame);    
+    plot(column,row,'.');    
     axis ([0 handles.WIrows 0 handles.WIcolumns]);
     %set(hMovie, 'XTick', [], 'YTick', []);
     refresh;
