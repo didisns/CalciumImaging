@@ -975,10 +975,11 @@ set(hMovie, 'XTick', [], 'YTick', []);
 %Emanuele 19-10-2018 cambiatto scatter con plot'.'
 axes(hMovie);
 for i=1:handles.metadata.frames   
-    frame = squeeze(handles.erodedBinaryImages(:,:,1,i));
+    frame = squeeze(handles.erodedBinaryImages(:,:,1,i));    
     [row, column] = find(frame);    
-    plot(column,row,'.');    
+    scatter(column,row,1);       
     axis ([0 handles.WIrows 0 handles.WIcolumns]);
+    set(gca,'Ydir','reverse');
     %set(hMovie, 'XTick', [], 'YTick', []);
     refresh;
 %    myavi = addframe(myavi, hFig);

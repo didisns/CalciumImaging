@@ -4,7 +4,7 @@
 % let's set all the variables obtained until now from now.
 
 % First, after you obtained all the ROI particle and pasted in excel: 
-[~,~,excel] = xlsread('C:\Users\Dieds\Google Drive\PhD PCDH19\data\calcium imaging mosaic\test2.xlsx'); % fill out the name 
+[~,~,excel] = xlsread('C:\Users\SNS\Google Drive\PhD PCDH19\data\calcium imaging mosaic\test2.xlsx'); % fill out the name 
 greennumber = 1; % fill out the number of green ROIs, make sure they are second in the excel file
 rednumber = 7; % fill out the number of red ROIs, make sure they are third in the excel file
 imagingperiod = 0.12415810148978500000;
@@ -42,10 +42,8 @@ NUS = length(tmp);
 USrawstart = zeros(NUS,1);
 USrawend = zeros(NUS,1);
 for i = 1:NUS
-    st = tmp{i,2};
-    en = tmp{i,3};
-    USrawstart(i) = st;
-    USrawend(i) = en;
+    USrawstart(i) = tmp{i,2};
+    USrawend(i) = tmp{i,3};    
 end
 
 % then we have to remove those up states that were outside of the imaging
@@ -54,7 +52,7 @@ end
 
 validUS = zeros(NUS,1);
 for i = 1:NUS
-    if USrawend(i) <= LFPstartgalvo || USrawstart >= LFPstopgalvo
+    if USrawend(i) <= LFPstartgalvo || USrawstart(i) >= LFPstopgalvo
         validUS(i) = 0;
     else
         validUS(i) = 1;
@@ -74,14 +72,17 @@ if tmp{lastUS, 3} > LFPstopgalvo
     USrawend(lastUS) = LFPstopgalvo;
 end
 
-% Now we can set the correct start time in terms of time in seconds
+% Now we can set the correct start time in terms of time in seconds, all
+% nonvalid US have times of 0
 USstart = zeros(NUS, 1);
 USend = zeros(NUS, 1);
 for i = firstUS:lastUS
-    USstart(i) = USrawstart - LFPstartgalvo;
-    USend(i) = USrawend - LFPstartgalvo;
+    USstart(i) = USrawstart(i) - LFPstartgalvo;
+    USend(i) = USrawend(i) - LFPstartgalvo;
 end
     
 % Done with all the setting up.
-
+output.wFOV = struct('total area',1,'time active', 1, 'number transients',1,'average area transients',1,...
+    'average duration transients',1)
+% Set up output table!
 % Start with findings 
