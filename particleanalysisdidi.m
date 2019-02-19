@@ -4,15 +4,19 @@
 % let's set all the variables obtained until now from now.
 
 % First, after you obtained all the ROI particle and pasted in excel: 
-[~,~,excel] = xlsread('C:\Users\Dieds\Google Drive\PhD PCDH19\data\calcium imaging mosaic\test2.xlsx'); % fill out the name 
+[~,~,excel] = xlsread('C:\Users\SNS\Google Drive\PhD PCDH19\data\calcium imaging mosaic\test2.xlsx'); % fill out the name 
 greennumber = 1; % fill out the number of green ROIs, make sure they are second in the excel file
+greenROIarea = [166]; % fill out the area's of the green ROIs measured in imagej ROI manager
+redROIarea = [151, 140, 133, 112, 112, 140, 151]; % fill out the area's of the red ROIs measured in imagej ROI manager
 rednumber = 7; % fill out the number of red ROIs, make sure they are third in the excel file
-imagingperiod = 0.12415810148978500000;
+imagingperiod = 0.12415810148978500000; % this I always use, but always check whether correct
+umpixel = 1.18803166994996; % this I always use, but always check whether correct
+pixelnumber = 256; % this I always use, but always check whether correct
 
 %then you need the LFP data from Zebra
 LFPstartgalvo = 3.6865; % indicate the start time you obtained in the eventdetection tab 'save start imaging'
 LFPstopgalvo = 189.9205; % indicate the stop time you obtained in the eventdetection tab 'save start imaging'
-load('H:\Data to be analyzed\Calcium imaging\26-11-18 calcium imaging with LFP\UStable_26-11-18 calcium imaging with LFP_lfp_0008.abf.mat');
+load('L:\Data to be analyzed\Calcium imaging\26-11-18 calcium imaging with LFP\UStable_26-11-18 calcium imaging with LFP_lfp_0008.abf.mat');
 % here add the path to the saved table from eventdetection
 
 % check if import table up states is correct
@@ -83,71 +87,126 @@ end
 
 % Final part of setting up: the output struct
     
-output.wFOV = struct('total area',1,'time active', 1, 'number transients',1,'total area transients',1,...
-    'duration transients',1, 'peak transients',1, 'percentage in up states',1);
+output.wFOV = struct('area',1,'time', 1, 'number_transients',1,'area_transients',1,...
+    'duration_transients',1, 'peak_transients',1, 'percentage_up_states',1);
 
-output.red = struct('total area',1,'time active', 1, 'number transients',1,'total area transients',1,...
-    'duration transients',1, 'peak transients',1, 'percentage in up states',1);
+output.green = struct('area',1,'time', 1, 'number_transients',1,'area_transients',1,...
+    'duration_transients',1, 'peak_transients',1, 'percentage_up_states',1);
 
-output.green = struct('total area',1,'time active', 1, 'number transients',1,'total area transients',1,...
-    'duration transients',1, 'peak transients',1, 'percentage in up states',1);
+output.red = struct('area',1,'time', 1, 'number_transients',1,'area_transients',1,...
+    'duration_transients',1, 'peak_transients',1, 'percentage_up_states',1);
 
 % Done with all the setting up.
 
 % Start with findings 
 
-%% First part: total area involved in calcium transients. 
-%# pixels per minute of imaging in whole field of view or per cell.Each cell is kept
+%% First part: permil area involved in calcium transients. 
+% permil pixels involved in calcium activity of imaging in whole field of view or per cell.Each cell is kept
 % separately to look at later (otherwhise different amount of cells red and
 % green cells in the same ROI mess up the statistics)
 
 % whole field of view
-minutesimaging = timeframes(end)/60;
-areawFOV = sum([excel{:,3}])/minutesimaging;
+totalareawFOV = sum([excel{:,3}]);
+areawFOV = (totalareawFOV/(pixelnumber*pixelnumber*frame))*1000;
 
 %  For green cells
-areagreen = zeros(greennumber,1);
-for i = greenROIs    
-    cnumber = ((i-1)*5)+3;
-    areagreen(i) = sum([excel{:,cnumber}])/minutesimaging;
+totalareagreen = zeros(greennumber, 1);
+areagreen = zeros(greennumber, 1);
+for i = 1:greennumber
+    ROInumber = greenROIs(i);
+    cnumber = ((ROInumber-1)*5)+3;
+    totalareagreen(i) = sum([excel{:,cnumber}]);  
+    areagreen(i) = (totalareagreen(i)/(greenROIarea(i)*frame))*1000;
 end
 
 %  For red cells
-areared = zeros(rednumber,1);
-for i = redROIs    
-    cnumber = ((i-1)*5)+3;
-    areared(i) = sum([excel{:,cnumber}])/minutesimaging;
+totalareared = zeros(rednumber, 1);
+areared = zeros(rednumber, 1);
+for i = 1:rednumber
+    ROInumber = redROIs(i);
+    cnumber = ((ROInumber-1)*5)+3;
+    totalareared(i) = sum([excel{:,cnumber}]);
+    areared(i) = (totalareared(i)/(redROIarea(i)*frame))*1000;
 end
 
-%% Second part: total time involved in calcium imaging
+% Now add it all to the output struct
+
+output.wFOV.area = areawFOV;
+output.green.area = areagreen;
+output.red.area = areared;
+
+%% Second part: percentage time involved in calcium imaging
 
 % For whole field of view
 timewFOV = find([excel{:,3}]>0);
 perc_timewFOV = (length(timewFOV)/frame)*100;
 
 % for green cells
-timegreen = zeros(greennumber,1);
 perc_timegreen = zeros(greennumber,1);
-for i = greenROIs
-    cnumber = ((i-1)*5)+3;
-    timegreen(i) = find([excel{:,cnumber}]>0);  
-    perc_timegreen(i) = (length(timegreen(i))/frame)*100;
+for i = 1:greennumber
+    ROInumber = greenROIs(i);
+    cnumber = ((ROInumber-1)*5)+3;
+    timegreen = find([excel{:,cnumber}]>0);  
+    perc_timegreen(i) = (length(timegreen)/frame)*100;
 end
 
 % for red cells
-timered = zeros(rednumber,1);
 perc_timered = zeros(rednumber,1);
-for i = redROIs
-    cnumber = ((i-1)*5)+3;
-    timered(i) = find([excel{:,cnumber}]>0);
-    perc_timered(i) = (length(timered(i))/frame)*100;
+for i = 1:rednumber
+    ROInumber = redROIs(i);
+    cnumber = ((ROInumber-1)*5)+3;
+    timered = find([excel{:,cnumber}]>0);
+    perc_timered(i) = (length(timered)/frame)*100;
 end
+
+% Put it in output struct
+output.wFOV.time = perc_timewFOV;
+output.green.time = perc_timegreen;
+output.red.time = perc_timered;
 
 %% Third part: find the number of transients, their area, duration, and peak
 
 % for whole field of view
 
+% count the number of transients and register their start time
+
+countwFOV = 0;
+if timewFOV(1) == 1
+    countwFOV = countwFOV+1;
+    savei(countwFOV) = 1; % needed to determine the end time in the next loop
+    starttransients_wFOV(countwFOV) = 0;
+end
+
 for i=2:length(timewFOV)
-    if notranswFOV
+    if timewFOV(i)-1 ~= timewFOV(i-1);
+        countwFOV = countwFOV+1;
+        savei(countwFOV) = i;
+        currentframe = timewFOV(i);
+        starttransients_wFOV(countwFOV) = timeframes(currentframe);
+    end
+end
+
+% now find their end times 
+endtransients_wFOV = zeros(countwFOV, 1);
+
+for i = 1:(countwFOV-1)
+    indexend = savei(i+1)-1;
+    currentframe = timewFOV(indexend);
+    endtransients_wFOV(i) = timeframes(currentframe);
+end
+
+% then the end of the last transient is the last value of timewFOV
+currentframe = timewFOV(end);
+endtransients_wFOV(countwFOV) = timeframes(currentframe);
+
+% Then calculate metrics of transients
+duration_wFOV = zeros(countwFOV);
+areatr_wFOV = zeros(countwFOV);
+peak_wFOV = zeros(countwFOV);
+for i = 1:countwFOV
+    duration_wFOV(i) = endtransients_wFOV(i)-starttransients_wFOV(i);
+end
+    
+    
     
 
