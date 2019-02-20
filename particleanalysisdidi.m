@@ -4,7 +4,7 @@
 % let's set all the variables obtained until now from now.
 
 % First, after you obtained all the ROI particle and pasted in excel: 
-[~,~,excel] = xlsread('C:\Users\Dieds\Google Drive\PhD PCDH19\data\calcium imaging mosaic\test2.xlsx'); % fill out the name 
+[~,~,excel] = xlsread('C:\Users\SNS\Google Drive\PhD PCDH19\data\calcium imaging mosaic\test2.xlsx'); % fill out the name 
 greennumber = 1; % fill out the number of green ROIs, make sure they are second in the excel file
 greenROIarea = [166]; % fill out the area's of the green ROIs measured in imagej ROI manager
 redROIarea = [151, 140, 133, 112, 112, 140, 151]; % fill out the area's of the red ROIs measured in imagej ROI manager
@@ -16,7 +16,7 @@ pixelnumber = 256; % this I always use, but always check whether correct
 %then you need the LFP data from Zebra
 LFPstartgalvo = 3.6865; % indicate the start time you obtained in the eventdetection tab 'save start imaging'
 LFPstopgalvo = 189.9205; % indicate the stop time you obtained in the eventdetection tab 'save start imaging'
-load('C:\Users\Dieds\Google Drive\PhD PCDH19\data\calcium imaging mosaic\UStable_26-11-18 calcium imaging with LFP_lfp_0008.abf.mat');
+load('C:\Users\SNS\Google Drive\PhD PCDH19\data\calcium imaging mosaic\UStable_26-11-18 calcium imaging with LFP_lfp_0008.abf.mat');
 % here add the path to the saved table from eventdetection
 
 % check if import table up states is correct
@@ -115,7 +115,7 @@ areagreen = zeros(greennumber, 1);
 for i = 1:greennumber
     ROInumber = greenROIs(i);
     cnumber = ((ROInumber-1)*5)+3;
-    totalareagreen(i) = sum([excel{:,cnumber}]);  
+    totalareagreen(i) = sum([excel{:,cnumber}]);    
     areagreen(i) = (totalareagreen(i)/(greenROIarea(i)*frame))*1000;
 end
 
@@ -385,5 +385,65 @@ output.red.peak_transients = meanpeak_red;
 % for wFOV
 totalareawFOV = sum([excel{:,3}]); % already calculated but better to be sure
 
-for us = validUS2
-    
+us_area_wFOV = 0;
+for us = validUS2(1):validUS2(end)
+    [value, idxst_us] = min(abs(timeframes-USstart(us)));
+    [value2, idxen_us] = min(abs(timeframes-USend(us)));
+    currentarea = sum([excel{idxst_us:idxen_us,3}]);
+    us_area_wFOV = us_area_wFOV + currentarea;    
+end
+
+perc_us_wFOV = (us_area_wFOV/totalareawFOV)*100;
+
+% For green cells
+
+totalareagreen = zeros(greennumber, 1);
+us_area_green = zeros(greennumber, 1);
+perc_us_green = zeros(greennumber, 1);
+
+for i = 1:greennumber
+    ROInumber = greenROIs(i);
+    cnumber = ((ROInumber-1)*5)+3;
+    totalareagreen(i) = sum([excel{:,cnumber}]); 
+    if totalareagreen(i) == 0
+        perc_us_green(i) = NaN;
+    else        
+        for us = validUS2(1):validUS2(end)
+            [value, idxst_us] = min(abs(timeframes-USstart(us)));
+            [value2, idxen_us] = min(abs(timeframes-USend(us)));
+            currentarea = sum([excel{idxst_us:idxen_us,cnumber}]);
+            us_area_green(i) = us_area_green(i) + currentarea; 
+        end 
+        perc_us_green(i) = (us_area_green(i)/totalareagreen(i))*100;
+    end
+end
+
+% For red cells
+
+totalareared = zeros(rednumber, 1);
+us_area_red = zeros(rednumber, 1);
+perc_us_red = zeros(rednumber, 1);
+
+for i = 1:rednumber
+    ROInumber = redROIs(i);
+    cnumber = ((ROInumber-1)*5)+3;
+    totalareared(i) = sum([excel{:,cnumber}]);    
+    if totalareared(i) == 0
+        perc_us_red(i) = NaN;
+    else
+        for us = validUS2(1):validUS2(end)
+            [value, idxst_us] = min(abs(timeframes-USstart(us)));
+            [value2, idxen_us] = min(abs(timeframes-USend(us)));
+            currentarea = sum([excel{idxst_us:idxen_us,cnumber}]);
+            us_area_red(i) = us_area_red(i) + currentarea; 
+        end 
+        perc_us_red(i) = (us_area_red(i)/totalareared(i))*100;
+    end
+end
+
+% Add everything to the output struct
+
+output.wFOV.percentage_up_states = perc_us_wFOV;
+output.green.percentage_up_states = perc_us_green;
+output.red.percentage_up_states = perc_us_red;
+
