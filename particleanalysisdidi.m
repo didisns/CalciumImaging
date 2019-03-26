@@ -164,7 +164,7 @@ output.wFOV.time = perc_timewFOV;
 output.green.time = perc_timegreen;
 output.red.time = perc_timered;
 
-%% Third part: find the number of transients, their area, duration, and peak. wFOV.
+%% Third part: find the number of transients (in Hz), their mean area (as permille), mean duration (in s), and mean peak (in permille): wFOV.
 
 % for whole field of view
 
@@ -204,7 +204,7 @@ duration_wFOV = zeros(countwFOV, 1);
 areatr_wFOV = zeros(countwFOV, 1);
 peak_wFOV = zeros(countwFOV, 1);
 for i = 1:countwFOV
-    duration_wFOV(i) = endtransients_wFOV(i)-starttransients_wFOV(i);
+    duration_wFOV(i) = (endtransients_wFOV(i)-starttransients_wFOV(i))+imagingperiod;
     indexstart = find(timeframes==starttransients_wFOV(i));
     indexend = find(timeframes==endtransients_wFOV(i));
     areatr_wFOV(i) = sum([excel{indexstart:indexend,3}]);
@@ -212,22 +212,30 @@ for i = 1:countwFOV
 end
     
 meanduration_wFOV = mean(duration_wFOV);
+meandurationI_wFOV = meanduration_wFOV/imagingperiod;
 meanareatr_wFOV = mean(areatr_wFOV);
+meanareatr_permille_wFOV = (meanareatr_wFOV/(pixelnumber*pixelnumber*meandurationI_wFOV))*1000;
 meanpeak_wFOV = mean(peak_wFOV);
+meanpeak_permille_wFOV = (meanpeak_wFOV/(pixelnumber*pixelnumber))*1000;
 
 % save in output struct
+frequencywFOV = countwFOV/(imagingperiod*frame);
 
-output.wFOV.number_transients = countwFOV;
+output.wFOV.number_transients = frequencywFOV;
 output.wFOV.duration_transients = meanduration_wFOV;
-output.wFOV.area_transients = meanareatr_wFOV;
-output.wFOV.peak_transients = meanpeak_wFOV;
+output.wFOV.area_transients = meanareatr_permille_wFOV;
+output.wFOV.peak_transients = meanpeak_permille_wFOV;
 
 %%  Fourth part: find the number of transients, their area, duration, and peak. Green Cells.
 
 countgreen = zeros(greennumber, 1);
+frequencygreen = zeros(greennumber, 1);
 meanduration_green = zeros(greennumber, 1);
+meandurationI_green = zeros(greennumber, 1);
 meanareatr_green = zeros(greennumber, 1);
+meanareatr_permille_green = zeros(greennumber, 1);
 meanpeak_green = zeros(greennumber, 1);
+meanpeak_permille_green = zeros(greennumber, 1);
 
 for gr = 1:greennumber
     % first reset some vectors to make sure they don't end up wrong
@@ -242,10 +250,13 @@ for gr = 1:greennumber
     % if no transients at all
     if isempty (timegreen)
         countgreen(gr) = 0;
+        frequencygreen (gr) = 0;
         meanduration_green(gr) = 0;
+        meandurationI_green (gr) = 0;
         meanareatr_green(gr) = 0;
+        meanareatr_permille_green (gr) = 0;
         meanpeak_green(gr) = 0;
-        
+        meanpeak_permille_green (gr) = 0;
     else    
         countgreen(gr) = 0;
     
@@ -281,32 +292,41 @@ for gr = 1:greennumber
         areatr_green = zeros(countgreen(gr),1);
         peak_green = zeros(countgreen(gr),1);
         for i = 1:countgreen(gr)
-            duration_green(i) = endtransients_green(i)-starttransients_green(i);
+            duration_green(i) = (endtransients_green(i)-starttransients_green(i))+imagingperiod;
             indexstart = find(timeframes==starttransients_green(i));
             indexend = find(timeframes==endtransients_green(i));
             areatr_green(i) = sum([excel{indexstart:indexend,cnumber}]);
             peak_green(i) = max([excel{indexstart:indexend,cnumber}]);
         end
-    
-        meanduration_green(gr) = mean(duration_green);
+        
+        frequencygreen (gr) = countgreen (gr)/(imagingperiod*frame);
+        meanduration_green(gr) = mean(duration_green);        
+        meandurationI_green (gr) = meanduration_green(gr)/imagingperiod;       
         meanareatr_green(gr) = mean(areatr_green);
+        meanareatr_permille_green (gr) = (meanareatr_green(gr)/(pixelnumber*pixelnumber*meandurationI_green (gr)))*1000;
         meanpeak_green(gr) = mean(peak_green);
-    end    
+        meanpeak_permille_green (gr) = (meanpeak_green(gr)/(pixelnumber*pixelnumber))*1000;
+    end     
 end
 
 % save in output struct
 
-output.green.number_transients = countgreen;
+
+output.green.number_transients = frequencygreen;
 output.green.duration_transients = meanduration_green;
-output.green.area_transients = meanareatr_green;
-output.green.peak_transients = meanpeak_green;
+output.green.area_transients = meanareatr_permille_green;
+output.green.peak_transients = meanpeak_permille_green;
 
 %%  Fifth part: find the number of transients, their area, duration, and peak. Red Cells.
 
 countred = zeros(rednumber, 1);
+frequencyred = zeros(rednumber, 1);
 meanduration_red = zeros(rednumber, 1);
+meandurationI_red = zeros(rednumber, 1);
 meanareatr_red = zeros(rednumber, 1);
+meanareatr_permille_red = zeros(rednumber, 1);
 meanpeak_red = zeros(rednumber, 1);
+meanpeak_permille_red = zeros(rednumber, 1);
 
 for rr = 1:rednumber
     % first reset some vectors to make sure they don't end up wrong
@@ -321,9 +341,13 @@ for rr = 1:rednumber
     % if no transients at all
     if isempty (timered)
         countred(rr) = 0;
+        frequencyred (rr) = 0;
         meanduration_red(rr) = 0;
+        meandurationI_red (rr) = 0;
         meanareatr_red(rr) = 0;
+        meanareatr_permille_red (rr) = 0;
         meanpeak_red(rr) = 0;
+        meanpeak_permille_red (rr) = 0;
         
     else
         countred(rr) = 0;
@@ -360,25 +384,29 @@ for rr = 1:rednumber
         areatr_red = zeros(countred(rr),1);
         peak_red = zeros(countred(rr),1);
         for i = 1:countred(rr)
-            duration_red(i) = endtransients_red(i)-starttransients_red(i);
+            duration_red(i) = (endtransients_red(i)-starttransients_red(i))+imagingperiod;
             indexstart = find(timeframes==starttransients_red(i));
             indexend = find(timeframes==endtransients_red(i));
             areatr_red(i) = sum([excel{indexstart:indexend,cnumber}]);
             peak_red(i) = max([excel{indexstart:indexend,cnumber}]);
         end
-    
-        meanduration_red(rr) = mean(duration_red);
+        
+        frequencyred (rr) = countred (rr)/(imagingperiod*frame);
+        meanduration_red(rr) = mean(duration_red);        
+        meandurationI_red(rr) = meanduration_red(rr)/imagingperiod;        
         meanareatr_red(rr) = mean(areatr_red);
+        meanareatr_permille_red(rr) = (meanareatr_red(rr)/(pixelnumber*pixelnumber*meandurationI_red (rr)))*1000;
         meanpeak_red(rr) = mean(peak_red);
+        meanpeak_permille_red (rr) = (meanpeak_red(rr)/(pixelnumber*pixelnumber))*1000;
     end    
 end
 
 % save in output struct
 
-output.red.number_transients = countred;
+output.red.number_transients = frequencyred;
 output.red.duration_transients = meanduration_red;
-output.red.area_transients = meanareatr_red;
-output.red.peak_transients = meanpeak_red;
+output.red.area_transients = meanareatr_permille_red;
+output.red.peak_transients = meanpeak_permille_red;
 
 %% Finally: determine percentage of total pixels occuring in up states
 
@@ -447,3 +475,66 @@ output.wFOV.percentage_up_states = perc_us_wFOV;
 output.green.percentage_up_states = perc_us_green;
 output.red.percentage_up_states = perc_us_red;
 
+%% Finally: let's copy stuff into the clipboard for easy workflow
+
+% start with a first row of text
+fields = fieldnames(output.wFOV);
+column = length(fields)+1;
+str = ' ';
+for f = 1:column
+    if f == 1
+        str = sprintf('%s\t', str);
+    elseif f == column
+        str = sprintf('%s', str, fields{f-1});
+    else str = sprintf('%s\t', str, fields{f-1});
+    end    
+end
+str = sprintf('%s\n', str);
+
+% the second row will contain the wFOV 
+for f = 1:column
+    if f == 1
+        str = sprintf('%s\t', str, 'wFOV');
+    elseif f == column        
+        str = sprintf('%s%f', str, output.wFOV.(fields{f-1}));
+    else str = sprintf('%s%f\t', str, output.wFOV.(fields{f-1}));
+    end
+end
+str = sprintf('%s\n', str);
+
+% then the green cells
+
+for row = 1:length(output.green.peak_transients)
+    for f = 1:column        
+        if f == 1
+            str = sprintf('%s\t', str, 'green');
+        elseif f == column
+            vector = output.green.(fields{f-1});
+            str = sprintf('%s%f', str, vector(row));
+        else vector = output.green.(fields{f-1});
+            str = sprintf('%s%f\t', str, vector(row));
+        end
+    end
+    str = sprintf('%s\n', str);
+end
+
+% Finally the red cells
+for row = 1:length(output.red.peak_transients)
+    for f = 1:column        
+        if f == 1
+            str = sprintf('%s\t', str, 'red');
+        elseif f == column
+            vector = output.red.(fields{f-1});
+            str = sprintf('%s%f', str, vector(row));
+        else vector = output.red.(fields{f-1});
+            str = sprintf('%s%f\t', str, vector(row));
+        end
+    end
+    str = sprintf('%s\n', str);
+end
+    
+        
+clipboard ('copy',str);
+     
+% Notes: copy is correct now, but not for text: two tabs. Why??
+% Check if the results make sense yes or no
