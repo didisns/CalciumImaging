@@ -247,25 +247,30 @@ if handles.AsciiRB.Value, fmtSt = '*.dat';
     % This is the default mode. Data from the NI board or from the save button of Zebra.
     % The number of channels must be defined at priori only.
     
-    % Time axis is included in the data exported from Zebra as ASCII. Is
-    % not included in the data generated from the NI board
+    % Time axis is included in the data exported from Zebra as ASCII. Time it is
+    % not included in the data generated from the NI board. If time axis is
+    % included the sampling period is obtained directly from the input data.
     nc = handles.nCh;
     % Create the string describing the data format
     fmtSt='';
     for ii=1:handles.nCh
-       fmtSt = [fmtSt '%f'];
+       fmtSt=[fmtSt '%f'];
     end
     if handles.timeIncluded.Value,
         % add one column for the time axis
-        fmtSt = [fmtSt '%f'];
+        fmtSt=[fmtSt '%f'];
         nc = nc + 1;
     end    
     LFPin = fscanf(fid,fmtSt,[nc,inf]);
     l = size(LFPin);
     handles.dtaLen = l(2);
     if handles.timeIncluded.Value,
+        handles.spTxt.String = LFPin(1,2);      % display the sampling period 
+        handles.sp = LFPin(1,2);                % set the sampling period
         handles.time = LFPin(1,:);
         for i=1:handles.nCh
+            % now move to the left all channels to remove the column that
+            % was occupied by the time
             LFPin(i,:) = LFPin(i+1,:);
         end
     else
@@ -374,8 +379,8 @@ function xcorr_Callback(hObject, eventdata, handles)
 
 handles.CCmap = [];
 
-corrWin = str2double(handles.corrWinTxt.String); %Window for the computation of Xcorrelation spectra
-intWin = str2double(handles.intWndTxt.String); %Integration window for the computation of Xcorrelation measure
+corrWin = str2double(handles.corrWinTxt.String);
+intWin = str2double(handles.intWndTxt.String);
 % these data must be trasformed in number of frames
 corrWin = floor(corrWin/handles.parentHandles.metadata.meanSP);
 intWin = floor(intWin/(2*handles.parentHandles.metadata.meanSP));
@@ -398,7 +403,7 @@ guidata(hObject, handles)
 plotEmap(hObject, handles);
 guidata(hObject, handles)
 
-% now compute limits of the map
+%% now compute limits of the map
 
 function map = computeXcorr(hObject, handles, corrWin, intFrom, intTo)
 % First, grab the time coordinate from the imaging set and interpolate the
