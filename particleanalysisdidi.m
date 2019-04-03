@@ -535,6 +535,4 @@ end
     
         
 clipboard ('copy',str);
-     
-% Notes: copy is correct now, but not for text: two tabs. Why??
-% Check if the results make sense yes or no
+'finished!'
