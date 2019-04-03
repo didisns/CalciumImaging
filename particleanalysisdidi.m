@@ -4,11 +4,11 @@
 % let's set all the variables obtained until now from now.
 
 % First, after you obtained all the ROI particle and pasted in excel: 
-[~,~,excel] = xlsread('C:\Users\SNS\Google Drive\PhD PCDH19\data\calcium imaging mosaic\test2.xlsx'); % fill out the name 
+[~,~,excel] = xlsread('L:\Data to be analyzed\Calcium imaging\26-11-18 calcium imaging with LFP\lfp008.xlsx'); % fill out the name 
 greennumber = 1; % fill out the number of green ROIs, make sure they are second in the excel file
-greenROIarea = [166]; % fill out the area's of the green ROIs measured in imagej ROI manager
-redROIarea = [151, 140, 133, 112, 112, 140, 151]; % fill out the area's of the red ROIs measured in imagej ROI manager
-rednumber = 7; % fill out the number of red ROIs, make sure they are third in the excel file
+greenROIarea = [124]; % fill out the area's of the green ROIs measured in imagej ROI manager
+redROIarea = [126, 112, 96, 107, 126]; % fill out the area's of the red ROIs measured in imagej ROI manager
+rednumber = 5; % fill out the number of red ROIs, make sure they are third in the excel file
 imagingperiod = 0.12415810148978500000; % this I always use, but always check whether correct
 umpixel = 1.18803166994996; % this I always use, but always check whether correct
 pixelnumber = 256; % this I always use, but always check whether correct
@@ -16,7 +16,7 @@ pixelnumber = 256; % this I always use, but always check whether correct
 %then you need the LFP data from Zebra
 LFPstartgalvo = 3.6865; % indicate the start time you obtained in the eventdetection tab 'save start imaging'
 LFPstopgalvo = 189.9205; % indicate the stop time you obtained in the eventdetection tab 'save start imaging'
-load('C:\Users\SNS\Google Drive\PhD PCDH19\data\calcium imaging mosaic\UStable_26-11-18 calcium imaging with LFP_lfp_0008.abf.mat');
+load('L:\Data to be analyzed\Calcium imaging\26-11-18 calcium imaging with LFP\UStable_26-11-18 calcium imaging with LFP_lfp_0008.abf.mat');
 % here add the path to the saved table from eventdetection
 
 % check if import table up states is correct
