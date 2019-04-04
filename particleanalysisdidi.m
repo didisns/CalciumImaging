@@ -87,14 +87,17 @@ end
 
 % Final part of setting up: the output struct
     
-output.wFOV = struct('area',1,'time', 1, 'number_transients',1,'area_transients',1,...
-    'duration_transients',1, 'peak_transients',1, 'percentage_up_states',1);
+output.wFOV = struct('area',1, 'areapermille', 1, 'time', 1, 'number_transients',1,'area_transients',1,...
+    'areapermille_transients', 1, 'duration_transients',1, 'peak_transients',1, ...
+    'peakpermille_transients', 1, 'percentage_up_states',1);
 
-output.green = struct('area',1,'time', 1, 'number_transients',1,'area_transients',1,...
-    'duration_transients',1, 'peak_transients',1, 'percentage_up_states',1);
+output.green = struct('area',1, 'areapermille', 1, 'time', 1, 'number_transients',1,'area_transients',1,...
+    'areapermille_transients', 1, 'duration_transients',1, 'peak_transients',1, ...
+    'peakpermille_transients', 1, 'percentage_up_states',1);
 
-output.red = struct('area',1,'time', 1, 'number_transients',1,'area_transients',1,...
-    'duration_transients',1, 'peak_transients',1, 'percentage_up_states',1);
+output.red = struct('area',1, 'areapermille', 1, 'time', 1, 'number_transients',1,'area_transients',1,...
+    'areapermille_transients', 1, 'duration_transients',1, 'peak_transients',1, ...
+    'peakpermille_transients', 1, 'percentage_up_states',1);
 
 % Done with all the setting up.
 
@@ -107,33 +110,41 @@ output.red = struct('area',1,'time', 1, 'number_transients',1,'area_transients',
 
 % whole field of view
 totalareawFOV = sum([excel{:,3}]);
-areawFOV = (totalareawFOV/(pixelnumber*pixelnumber*frame))*1000;
+areawFOV_permille = (totalareawFOV/(pixelnumber*pixelnumber*frame))*1000;
+areawFOV = (totalareawFOV/frame)*(umpixel*umpixel);
 
 %  For green cells
 totalareagreen = zeros(greennumber, 1);
 areagreen = zeros(greennumber, 1);
+areagreen_permille = zeros(greennumber, 1);
 for i = 1:greennumber
     ROInumber = greenROIs(i);
     cnumber = ((ROInumber-1)*5)+3;
     totalareagreen(i) = sum([excel{:,cnumber}]);    
-    areagreen(i) = (totalareagreen(i)/(greenROIarea(i)*frame))*1000;
+    areagreen_permille(i) = (totalareagreen(i)/(greenROIarea(i)*frame))*1000;
+    areagreen(i) = (totalareagreen(i)/frame)*(umpixel*umpixel);
 end
 
 %  For red cells
 totalareared = zeros(rednumber, 1);
 areared = zeros(rednumber, 1);
+areared_permille = zeros(rednumber, 1);
 for i = 1:rednumber
     ROInumber = redROIs(i);
     cnumber = ((ROInumber-1)*5)+3;
     totalareared(i) = sum([excel{:,cnumber}]);
-    areared(i) = (totalareared(i)/(redROIarea(i)*frame))*1000;
+    areared_permille(i) = (totalareared(i)/(redROIarea(i)*frame))*1000;
+    areared(i) = (totalareared(i)/frame)*(umpixel*umpixel);
 end
 
 % Now add it all to the output struct
 
 output.wFOV.area = areawFOV;
+output.wFOV.areapermille = areawFOV_permille;
 output.green.area = areagreen;
+output.green.areapermille = areagreen_permille;
 output.red.area = areared;
+output.red.areapermille = areared_permille;
 
 %% Second part: percentage time involved in calcium imaging
 
@@ -214,8 +225,10 @@ end
 meanduration_wFOV = mean(duration_wFOV);
 meandurationI_wFOV = meanduration_wFOV/imagingperiod;
 meanareatr_wFOV = mean(areatr_wFOV);
+meanareatr_wFOV_um = meanareatr_wFOV*(umpixel*umpixel);
 meanareatr_permille_wFOV = (meanareatr_wFOV/(pixelnumber*pixelnumber*meandurationI_wFOV))*1000;
 meanpeak_wFOV = mean(peak_wFOV);
+meanpeak_wFOV_um = meanpeak_wFOV*(umpixel*umpixel);
 meanpeak_permille_wFOV = (meanpeak_wFOV/(pixelnumber*pixelnumber))*1000;
 
 % save in output struct
@@ -223,8 +236,10 @@ frequencywFOV = countwFOV/(imagingperiod*frame);
 
 output.wFOV.number_transients = frequencywFOV;
 output.wFOV.duration_transients = meanduration_wFOV;
-output.wFOV.area_transients = meanareatr_permille_wFOV;
-output.wFOV.peak_transients = meanpeak_permille_wFOV;
+output.wFOV.area_transients = meanareatr_wFOV_um;
+output.wFOV.areapermille_transients = meanareatr_permille_wFOV;
+output.wFOV.peak_transients = meanpeak_wFOV_um;
+output.wFOV.peakpermille_transients = meanpeak_permille_wFOV;
 
 %%  Fourth part: find the number of transients, their area, duration, and peak. Green Cells.
 
@@ -233,8 +248,10 @@ frequencygreen = zeros(greennumber, 1);
 meanduration_green = zeros(greennumber, 1);
 meandurationI_green = zeros(greennumber, 1);
 meanareatr_green = zeros(greennumber, 1);
+meanareatr_green_um = zeros(greennumber, 1);
 meanareatr_permille_green = zeros(greennumber, 1);
 meanpeak_green = zeros(greennumber, 1);
+meanpeak_green_um = zeros(greennumber, 1);
 meanpeak_permille_green = zeros(greennumber, 1);
 
 for gr = 1:greennumber
@@ -254,8 +271,10 @@ for gr = 1:greennumber
         meanduration_green(gr) = 0;
         meandurationI_green (gr) = 0;
         meanareatr_green(gr) = 0;
+        meanareatr_green_um(gr) = 0;
         meanareatr_permille_green (gr) = 0;
         meanpeak_green(gr) = 0;
+        meanpeak_green_um(gr) = 0;
         meanpeak_permille_green (gr) = 0;
     else    
         countgreen(gr) = 0;
@@ -303,9 +322,11 @@ for gr = 1:greennumber
         meanduration_green(gr) = mean(duration_green);        
         meandurationI_green (gr) = meanduration_green(gr)/imagingperiod;       
         meanareatr_green(gr) = mean(areatr_green);
-        meanareatr_permille_green (gr) = (meanareatr_green(gr)/(pixelnumber*pixelnumber*meandurationI_green (gr)))*1000;
+        meanareatr_green_um(gr) = meanareatr_green(gr)*(umpixel*umpixel);
+        meanareatr_permille_green (gr) = (meanareatr_green(gr)/(greenROIarea(gr)*meandurationI_green (gr)))*1000;
         meanpeak_green(gr) = mean(peak_green);
-        meanpeak_permille_green (gr) = (meanpeak_green(gr)/(pixelnumber*pixelnumber))*1000;
+        meanpeak_green_um(gr) = meanpeak_green(gr)*(umpixel*umpixel);
+        meanpeak_permille_green (gr) = (meanpeak_green(gr)/greenROIarea(gr))*1000;
     end     
 end
 
@@ -314,8 +335,10 @@ end
 
 output.green.number_transients = frequencygreen;
 output.green.duration_transients = meanduration_green;
-output.green.area_transients = meanareatr_permille_green;
-output.green.peak_transients = meanpeak_permille_green;
+output.green.area_transients = meanareatr_green_um;
+output.green.areapermille_transients = meanareatr_permille_green;
+output.green.peak_transients = meanpeak_green_um;
+output.green.peakpermille_transients = meanpeak_permille_green;
 
 %%  Fifth part: find the number of transients, their area, duration, and peak. Red Cells.
 
@@ -324,8 +347,10 @@ frequencyred = zeros(rednumber, 1);
 meanduration_red = zeros(rednumber, 1);
 meandurationI_red = zeros(rednumber, 1);
 meanareatr_red = zeros(rednumber, 1);
+meanareatr_red_um = zeros(rednumber, 1);
 meanareatr_permille_red = zeros(rednumber, 1);
 meanpeak_red = zeros(rednumber, 1);
+meanpeak_red_um = zeros(rednumber, 1);
 meanpeak_permille_red = zeros(rednumber, 1);
 
 for rr = 1:rednumber
@@ -345,8 +370,10 @@ for rr = 1:rednumber
         meanduration_red(rr) = 0;
         meandurationI_red (rr) = 0;
         meanareatr_red(rr) = 0;
+        meanareatr_red_um(rr) = 0;
         meanareatr_permille_red (rr) = 0;
         meanpeak_red(rr) = 0;
+        meanpeak_red_um(rr) = 0;
         meanpeak_permille_red (rr) = 0;
         
     else
@@ -395,9 +422,11 @@ for rr = 1:rednumber
         meanduration_red(rr) = mean(duration_red);        
         meandurationI_red(rr) = meanduration_red(rr)/imagingperiod;        
         meanareatr_red(rr) = mean(areatr_red);
-        meanareatr_permille_red(rr) = (meanareatr_red(rr)/(pixelnumber*pixelnumber*meandurationI_red (rr)))*1000;
+        meanareatr_red_um(rr) = meanareatr_red(rr)*(umpixel*umpixel);
+        meanareatr_permille_red(rr) = (meanareatr_red(rr)/(redROIarea(rr)*meandurationI_red (rr)))*1000;
         meanpeak_red(rr) = mean(peak_red);
-        meanpeak_permille_red (rr) = (meanpeak_red(rr)/(pixelnumber*pixelnumber))*1000;
+        meanpeak_red_um(rr) = meanpeak_red(rr)*(umpixel*umpixel);
+        meanpeak_permille_red (rr) = (meanpeak_red(rr)/redROIarea(rr))*1000;
     end    
 end
 
@@ -405,8 +434,10 @@ end
 
 output.red.number_transients = frequencyred;
 output.red.duration_transients = meanduration_red;
-output.red.area_transients = meanareatr_permille_red;
-output.red.peak_transients = meanpeak_permille_red;
+output.red.area_transients = meanareatr_red_um;
+output.red.areapermille_transients = meanareatr_permille_red;
+output.red.peak_transients = meanpeak_red_um;
+output.red.peakpermille_transients = meanpeak_permille_red;
 
 %% Finally: determine percentage of total pixels occuring in up states
 
