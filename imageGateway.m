@@ -197,7 +197,7 @@ end
 
 % create the x axis
 
-%handles.timeI = (0:handles.metadata.meanSP:handles.metadata.meanSP*(handles.metadata.frames-1));
+handles.timeI = (0:handles.metadata.meanSP:handles.metadata.meanSP*(handles.metadata.frames-1));
 
 % create the workImages file that hold the images as they move along the
 % processing pipeline. workImage holds only the target channel
