@@ -184,12 +184,12 @@ if get(handles.TIFFmultiImageRB,'Value'), fmtSt = '*.tif';
     handles.metadata.ydim = handles.tifInfo(1).Height;
     handles.metadata.tpoints = handles.tifInfo(1).StripOffsets;
     handles.rawImages=zeros( handles.metadata.xdim,handles.metadata.ydim,1,nframe);
-    tmp=zeros(handles.metadata.xdim,handles.metadata.ydim,1);
+    tmp=zeros(handles.metadata.xdim,handles.metadata.ydim,1);   
     for i=1:nframe
-        %offsettif=handles.tifInfo(i).Offset;
+        %offsettif=handles.tifInfo(i).Offset;        
         tmp = imread(pathAndFileIn,'Index',i);
         %tmp=tmp-offsettif;
-         handles.rawImages(:,:,:,i)=tmp;
+        handles.rawImages(:,:,:,i)=tmp;
     end    
     
     %handles.metadata.ch = 

@@ -3,21 +3,25 @@
 
 % let's set all the variables obtained until now from now.
 
+%% Import information
+
 % First, after you obtained all the ROI particle and pasted in excel: 
-[~,~,excel] = xlsread('L:\Data to be analyzed\Calcium imaging\26-11-18 calcium imaging with LFP\lfp013.xlsx'); % fill out the name 
-greennumber = 2; % fill out the number of green ROIs, make sure they are second in the excel file
-greenROIarea = [124, 124]; % fill out the area's of the green ROIs measured in imagej ROI manager
-redROIarea = [89, 86, 136, 136, 126]; % fill out the area's of the red ROIs measured in imagej ROI manager
-rednumber = 5; % fill out the number of red ROIs, make sure they are third in the excel file
+[~,~,excel] = xlsread('L:\Data to be analyzed\Calcium imaging\11-02-2019 animal 1\lfp011.xlsx'); % fill out the name 
+greennumber = 7; % fill out the number of green ROIs, make sure they are second in the excel file
+greenROIarea = [164, 138, 148, 140, 89, 146, 112]; % fill out the area's of the green ROIs measured in imagej ROI manager
+redROIarea = [98, 126, 146, 140, 137, 98, 124]; % fill out the area's of the red ROIs measured in imagej ROI manager
+rednumber = 7; % fill out the number of red ROIs, make sure they are third in the excel file
 imagingperiod = 0.12415810148978500000; % this I always use, but always check whether correct
 umpixel = 1.18803166994996; % this I always use, but always check whether correct
 pixelnumber = 256; % this I always use, but always check whether correct
 
 %then you need the LFP data from Zebra
-LFPstartgalvo = 3.3395; % indicate the start time you obtained in the eventdetection tab 'save start imaging'
-LFPstopgalvo = 189.5725; % indicate the stop time you obtained in the eventdetection tab 'save start imaging'
-load('L:\Data to be analyzed\Calcium imaging\26-11-18 calcium imaging with LFP\UStable_26-11-18 calcium imaging with LFP_lfp_0013.abf.mat');
+LFPstartgalvo = 3.2530; % indicate the start time you obtained in the eventdetection tab 'save start imaging'
+LFPstopgalvo = 189.4875; % indicate the stop time you obtained in the eventdetection tab 'save start imaging'
+load('L:\Data to be analyzed\Calcium imaging\11-02-2019 animal 1\UStable_11-02-2019 animal 1_lfp_0011.abf.mat');
 % here add the path to the saved table from eventdetection
+
+%%  End of import information
 
 % check if import table up states is correct
 if isempty(tmp)
@@ -42,7 +46,7 @@ end
 
 % find the up state start and end times as determined in eventdetection,
 % from the start of the ephys recording
-NUS = length(tmp);
+[NUS value] = size(tmp);
 USrawstart = zeros(NUS,1);
 USrawend = zeros(NUS,1);
 for i = 1:NUS
