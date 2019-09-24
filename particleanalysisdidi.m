@@ -6,19 +6,19 @@
 %% Import information
 
 % First, after you obtained all the ROI particle and pasted in excel: 
-[~,~,excel] = xlsread('L:\Data to be analyzed\Calcium imaging\20190801\lfp011.xlsx'); % fill out the name 
-greennumber = 1; % fill out the number of green ROIs, make sure they are second in the excel file
-greenROIarea = [147]; % fill out the area's of the green ROIs measured in imagej ROI manager
-redROIarea = [160]; % fill out the area's of the red ROIs measured in imagej ROI manager
-rednumber = 1; % fill out the number of red ROIs, make sure they are third in the excel file
+[~,~,excel] = xlsread('L:\Data to be analyzed\Calcium imaging\20190801 animal 2\lfp017.xlsx'); % fill out the name 
+greennumber = 3; % fill out the number of green ROIs, make sure they are second in the excel file
+greenROIarea = [172, 177, 128]; % fill out the area's of the green ROIs measured in imagej ROI manager
+redROIarea = [126, 133, 151]; % fill out the area's of the red ROIs measured in imagej ROI manager
+rednumber = 3; % fill out the number of red ROIs, make sure they are third in the excel file
 imagingperiod = 0.12415810148978500000; % this I always use, but always check whether correct
 umpixel = 1.18803166994996; % this I always use, but always check whether correct
 pixelnumber = 256; % this I always use, but always check whether correct
 
 %then you need the LFP data from Zebra
-LFPstartgalvo =  3.8050; % indicate the start time you obtained in the eventdetection tab 'save start imaging'
-LFPstopgalvo =  190.0395; % indicate the stop time you obtained in the eventdetection tab 'save start imaging'
-load('L:\Data to be analyzed\Calcium imaging\20190801\UStable_20190801_lfp_0011.abf.mat');
+LFPstartgalvo = 3.3625; % indicate the start time you obtained in the eventdetection tab 'save start imaging'
+LFPstopgalvo = 189.5955; % indicate the stop time you obtained in the eventdetection tab 'save start imaging'
+load('L:\Data to be analyzed\Calcium imaging\20190801 animal 2\UStable_20190801 animal 2_lfp_0017.abf.mat');
 % here add the path to the saved table from eventdetection
 
 %%  End of import information
