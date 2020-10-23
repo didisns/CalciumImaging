@@ -1,27 +1,52 @@
 
-% February 2019 by Didi. In order to analyze the calcium imaging data
+% February 2019 by Didi. Program to analyze calcium transients obtained
+% from ImageJ, and correspond them to up states detected in the LFP trace. 
 
-% let's set all the variables obtained until now from now.
+% The program takes as an input an excel file containing the particles calculated using ImageJ's
+% "Analyze Particles". It contains on each column information for one ROI, each row represents one
+% time point, a 0 denotes no particle detected, a 1 that a particle has been detected.
+% The input excel file requires the particles counted in the entire field of view
+% in the first column, then the green ROI(s) in the following column(s), the red
+% ROI(s) in the last column(s). No header info should be provided.
+
+% THe second input file is the UP state table, which is the output of ZebraExplore's 
+% eventdetection module.  
+
+% The program outputs some quantifications in terms of the calcium 'transients'.
+% Results are copied to the clipboard, which I pasted in excel files. 
+
+% Output:
+% Area: 	in cubic micron, average per frame
+% Areapermille:	permille of all pixels involved in calcium acitivity, for ROIs based on area ROI
+% Time:	percentage of frames where there is some form of calcium activity
+% Number_transients:	Transients (framenumber with calcium acivity) in Hz (SO NOT INIDIVDUAL SPOTS!!)
+% Duration_transients:	Duration in seconds of above-mentioned transients
+% Area_transients:	Sum all pixels in transients in um
+% Areapermille_transients:	permille of all pixels in transients involved in calcium acitivity, for ROIs based on area ROI
+% Peak_transients:	Highest value of transients, in um
+%Peakpermille_transients:	Highest value of transients, in permille pixels, for ROIs based on area ROI
+% Percentage_up_states:	Percentage pixels in binary file that fall within up states
+
 
 %% Import information
 
-% First, after you obtained all the ROI particle and pasted in excel: 
+% Reading of the excel input file and other information
 [~,~,excel] = xlsread('L:\Data to be analyzed\Calcium imaging\20190803\lfp018.xlsx'); % fill out the name 
-greennumber = 5; % fill out the number of green ROIs, make sure they are second in the excel file
-greenROIarea = [137, 177, 128, 140, 104]; % fill out the area's of the green ROIs measured in imagej ROI manager
-redROIarea = [219, 137, 136, 102, 102]; % fill out the area's of the red ROIs measured in imagej ROI manager
-rednumber = 5; % fill out the number of red ROIs, make sure they are third in the excel file
-imagingperiod = 0.12415810148978500000; % this I always use, but always check whether correct
-umpixel = 1.18803166994996; % this I always use, but always check whether correct
-pixelnumber = 256; % this I always use, but always check whether correct
+greennumber = 5; % the number of green ROIs, make sure they are second in the excel file
+greenROIarea = [137, 177, 128, 140, 104]; % the area's of the green ROIs measured in imagej ROI manager
+redROIarea = [219, 137, 136, 102, 102]; % the area's of the red ROIs measured in imagej ROI manager
+rednumber = 5; % the number of red ROIs, make sure they are third in the excel file
+imagingperiod = 0.12415810148978500000; % period of one frame (in seconds)
+umpixel = 1.18803166994996; % um per pixel of the imaging data
+pixelnumber = 256; % always a square: i.e. 356*256 pixels.
 
-%then you need the LFP data from Zebra
-LFPstartgalvo = 3.6035; % indicate the start time you obtained in the eventdetection tab 'save start imaging'
-LFPstopgalvo = 189.8365; % indicate the stop time you obtained in the eventdetection tab 'save start imaging'
+%then the LFP data from ZebraExplore
+LFPstartgalvo = 3.6035; % indicate the start time obtained in the eventdetection tab 'save start imaging'
+LFPstopgalvo = 189.8365; % indicate the stop time obtained in the eventdetection tab 'save start imaging'
 load('L:\Data to be analyzed\Calcium imaging\20190803\UStable_20190803_lfp_0018.abf.mat');
 % here add the path to the saved table from eventdetection
 
-%%  End of import information
+%%  
 
 % check if import table up states is correct
 if isempty(tmp)
@@ -528,15 +553,6 @@ output.red.percentage_up_states = perc_us_red;
 fields = fieldnames(output.wFOV);
 column = length(fields)+1;
 str = ' ';
-%for f = 1:column
-%    if f == 1
-%        str = sprintf('%s\t', str);
-%    elseif f == column
-%        str = sprintf('%s', str, fields{f-1});
-%    else str = sprintf('%s\t', str, fields{f-1});
-%    end    
-%end
-%str = sprintf('%s\n', str);
 
 % the second row will contain the wFOV 
 for f = 1:column
